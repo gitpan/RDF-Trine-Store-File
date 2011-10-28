@@ -22,11 +22,11 @@ RDF::Trine::Store::File - Using a file with N-Triples as triplestore
 
 =head1 VERSION
 
-Version 0.01_02
+Version 0.01_03
 
 =cut
 
-our $VERSION = '0.01_02';
+our $VERSION = '0.01_03';
 
 
 =head1 SYNOPSIS
@@ -67,6 +67,14 @@ sub new {
   return $self;
 }
 
+
+sub _new_with_string {
+  my $class = shift;
+  return $class->new(shift);
+}
+
+
+
 =head2 temporary_store
 
 Constructor that creates a temporary file to work on.
@@ -75,7 +83,7 @@ Constructor that creates a temporary file to work on.
 
 sub temporary_store {
   my $class = shift;
-  my ($fh, $filename) = tempfile();
+  my ($fh, $filename) = tempfile(EXLOCK => 0);
   return $class->new($filename);
 }
 

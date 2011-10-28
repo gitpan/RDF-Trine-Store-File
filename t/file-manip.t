@@ -8,7 +8,7 @@ use File::Temp qw/tempfile cleanup/;
 
 use_ok('RDF::Trine::Store::File');
 
-my ($fh, $filename) = tempfile();
+my ($fh, $filename) = tempfile(EXLOCK => 0);
 
 my $store = RDF::Trine::Store::File->new($filename);
 
@@ -104,5 +104,23 @@ is($store->size, 1, 'Store has one statement after match-remove');
 $store->nuke;
 
 ok(! -e $filename, 'File is gone');
+
+{
+  my $store2 = RDF::Trine::Store::File->new_with_string('File;' . $filename);
+
+  ok($store2, 'Store with string config object OK');
+
+  $store2->add_statement(RDF::Trine::Statement->new(
+						    RDF::Trine::Node::Resource->new('http://example.org/a'),
+						    RDF::Trine::Node::Resource->new('http://example.org/b'),
+						    RDF::Trine::Node::Resource->new('http://example.org/c')
+						   ));
+
+  is($store2->size, 1, 'Store with string config has one statement according to size');
+
+  $store2->nuke;
+
+  ok(! -e $filename, 'File with string config is gone');
+}
 
 done_testing;
