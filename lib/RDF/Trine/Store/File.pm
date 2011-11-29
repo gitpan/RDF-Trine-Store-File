@@ -22,11 +22,11 @@ RDF::Trine::Store::File - Using a file with N-Triples as triplestore
 
 =head1 VERSION
 
-Version 0.01_03
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01_03';
+our $VERSION = '0.02';
 
 
 =head1 SYNOPSIS
@@ -277,6 +277,15 @@ expressions as search patterns in the file. This is likely to be
 somewhat fragile (it is making assumptions about the file that is true
 in the L<RDF::Trine::Serializer::Ntriples> case, but not in the
 format), but it kinda works.
+
+It is important to note that this module does nothing to prevent you
+from adding duplicate statements like other stores should do. This is
+because it would dramatically reduce C<add_statement> performance and
+thus kill the main use case for this module. Perhaps it could be made
+optional at some point, but for now, just be aware that this may not
+always return the right counts if two identical statements are
+inserted.
+
 
 I've decided to use L<File::Data> to actually do the work with the
 file. Locking and that kind of stuff is done there and is thus Not My
