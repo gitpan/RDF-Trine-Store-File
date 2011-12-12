@@ -21,8 +21,10 @@ META.yml
 README
 SIGNATURE
 t/00-load.t
+t/constructors.t
 t/file-manip.t
 t/search-regexp.t
+t/store-file.t
 xt/0-signature.t
 xt/manifest.t
 xt/pod-coverage.t

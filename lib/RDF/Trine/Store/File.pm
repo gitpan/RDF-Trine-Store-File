@@ -22,11 +22,11 @@ RDF::Trine::Store::File - Using a file with N-Triples as triplestore
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03_1
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03_1';
 
 
 =head1 SYNOPSIS
@@ -67,13 +67,35 @@ sub new {
   return $self;
 }
 
+=head2 new_with_string('File;'.$filename)
+
+A constructor, takes a string config as parameter. If the file doesn't
+exist, it will be created. The string will typically begin with C<File;>, e.g.
+
+  my $store = RDF::Trine::Store::File->new_with_string('File;/path/to/file.nt');
+
+=cut
 
 sub _new_with_string {
-  my $class = shift;
-  return $class->new(shift);
+  my ($class, $filename) = @_;
+  return $class->new($filename);
 }
 
+=head2 new_with_config({ storetype => 'File', file => $filename});
 
+A constructor, takes a hashref config as parameter. If the file doesn't
+exist, it will be created. It needs to have a C<storetype> key with C<File> as the value, e.g.
+
+  my $store = RDF::Trine::Store::File->new_with_config({ storetype => 'File', file => $filename});
+
+
+=cut
+
+sub _new_with_config {
+  my $class = shift;
+  my $config = shift;
+  return $class->new($config->{file});
+}
 
 =head2 temporary_store
 
@@ -163,7 +185,9 @@ sub remove_statement {
   $mm->add_statement($st);
   $self->{log}->debug("Attempting removal of statement");
   my $fd = File::Data->new($self->{file});
-  $fd->REPLACE($self->{nser}->serialize_model_to_string($mm), '');
+  my $triple = $self->{nser}->serialize_model_to_string($mm);
+  $triple =~ s/\^/\\^/g;
+  $fd->REPLACE($triple, '');
   return;
 }
 
@@ -230,7 +254,9 @@ Permanently removes the store file and its data.
 =cut
 
 sub nuke {
-  unlink $_[0]->{file};
+  my $self = shift;
+  unlink $self->{file};
+  return $self;
 }
 
 # Private method to create a regexp to be used in all kind of searching
@@ -239,8 +265,9 @@ sub _search_regexp {
   my $self = shift;
   my $i = 1;
   my @stmt;
-  foreach my $term (@_) { # Create an array of RDF terms for later replacing for variables
+  foreach my $term (@_[0..2]) { # Create an array of RDF terms for later replacing for variables, discard context
     my $outterm = $term || RDF::Trine::Node::Resource->new("urn:rdf-trine-store-file-$i");
+    $outterm = RDF::Trine::Node::Resource->new("urn:rdf-trine-store-file-$i") if ($outterm->isa('RDF::Trine::Node::Variable'));
     push(@stmt, $outterm);
     $i++;
   }
@@ -251,6 +278,7 @@ sub _search_regexp {
   $triple_resources =~ s/\.\s*$/\\./;
   $triple_resources =~ s/urn:rdf-trine-store-file-(1|2)/.*?/g;
   $triple_resources =~ s/<urn:rdf-trine-store-file-3>/.*/;
+  $triple_resources =~ s/\^/\\^/g;
   my $out = '(' . $triple_resources . '\n)';
   $self->{log}->debug("Search regexp: $out");
   return $out;
@@ -284,7 +312,8 @@ because it would dramatically reduce C<add_statement> performance and
 thus kill the main use case for this module. Perhaps it could be made
 optional at some point, but for now, just be aware that this may not
 always return the right counts if two identical statements are
-inserted.
+inserted and possibly produce unexpected results if you against the
+advice above should attempt to use this a store for SPARQL.
 
 
 I've decided to use L<File::Data> to actually do the work with the
@@ -295,16 +324,14 @@ place to go and fix it.
 
 =head1 TODO
 
-This is alpha-quality software and there are some important things to
-do before it is ready for general use:
+This is beta-quality software but it has a pretty comprehensive test
+suite. These are some things that could be done:
 
 =over
 
-=item * Use the Test::RDF::Trine::Store test suite (without it, this module is arguably not well tested).
-
-=item * Support more constructors (e.g. C<new_with_config>)
-
 =item * Support bulk operations (somewhat less important)
+
+=item * Find a way to do duplicate checking efficiently
 
 =back
 
