@@ -1,0 +1,120 @@
+@prefix cpan-uri: <http://purl.org/NET/cpan-uri/terms#> .
+@prefix dc:    <http://purl.org/dc/terms/> .
+@prefix doap:  <http://usefulinc.com/ns/doap#> .
+@prefix doap-changeset: <http://ontologi.es/doap-changeset#> .
+@prefix doap-deps: <http://ontologi.es/doap-deps#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+<file:///home/kjetil/dev/RDF-Trine-Store-File/meta/project.ttl>
+	dc:creator           <http://www.kjetil.kjernsmo.net/foaf#me>;
+	dc:subject           <http://purl.org/NET/cpan-uri/dist/RDF-Trine-Store-File/project>;
+	dc:title             "DOAP for RDF-Trine-Store-File"@en.
+
+<http://dbpedia.org/resource/Category:Semantic_Web>
+	rdfs:label           "Semantic Web"@en.
+
+<http://purl.org/NET/cpan-uri/dist/RDF-Trine-Store-File/project>
+	a                    doap:Project;
+	cpan-uri:x_IRC       <irc://irc.perl.org/#perlrdf>;
+	doap-deps:runtime-requirement [ doap-deps:on "Scalar::Util"^^doap-deps:CpanId ], [ doap-deps:on "Carp"^^doap-deps:CpanId ], [ doap-deps:on "Log::Log4perl"^^doap-deps:CpanId ], [ doap-deps:on "Digest::MD5"^^doap-deps:CpanId ], [ doap-deps:on "RDF::Trine 1.011"^^doap-deps:CpanId ], [ doap-deps:on "File::Temp"^^doap-deps:CpanId ], [ doap-deps:on "File::Util"^^doap-deps:CpanId ], [ doap-deps:on "List::MoreUtils"^^doap-deps:CpanId ], [ doap-deps:on "File::Data"^^doap-deps:CpanId ];
+	doap-deps:test-requirement [ doap-deps:on "Test::More"^^doap-deps:CpanId ], [
+		doap-deps:on "Test::RDF::Trine::Store 0.137"^^doap-deps:CpanId;
+	], [ doap-deps:on "Test::RDF 0.24"^^doap-deps:CpanId ], [ doap-deps:on "URI::Escape"^^doap-deps:CpanId ];
+	doap:bug-database    <https://github.com/kjetilk/RDF-Trine-Store-File/issues>;
+	doap:category        <http://dbpedia.org/resource/Category:Semantic_Web>;
+	doap:created         "2011-07-21"^^xsd:date;
+	doap:download-page   <https://metacpan.org/release/RDF-Trine-Store-File>;
+	doap:homepage        <https://metacpan.org/release/RDF-Trine-Store-File>;
+	doap:license         <http://dev.perl.org/licenses/>;
+	doap:mailing-list    <http://lists.perlrdf.org/listinfo/dev>;
+	doap:maintainer      <http://www.kjetil.kjernsmo.net/foaf#me>;
+	doap:name            "RDF-Trine-Store-File";
+	doap:programming-language "Perl";
+	doap:release         <http://purl.org/NET/cpan-uri/dist/RDF-Trine-Store-File/v_0-11-2>, <http://purl.org/NET/cpan-uri/dist/RDF-Trine-Store-File/v_0_02>, <http://purl.org/NET/cpan-uri/dist/RDF-Trine-Store-File/v_0_1>;
+	doap:repository      [
+		a doap:GitRepository;
+		doap:browse <https://github.com/kjetilk/RDF-Trine-Store-File/>;
+		prov:has_provenance <http://git2prov.org/git2prov?giturl=https%3A%2F%2Fgithub.com%2Fkjetilk%2FRDF-Trine-Store-File&serialization=PROV-O#>;
+	];
+	doap:shortdesc       "Simple file triple and quad store based on NTriple files."@en;
+	doap:wiki            <http://wiki.perlrdf.org/>.
+
+<http://purl.org/NET/cpan-uri/dist/RDF-Trine-Store-File/v_0-11-2>
+	a                    doap:Version;
+	rdfs:label           "Unfinished quad support."@en;
+	dc:issued            "2014-11-20"^^xsd:date;
+	doap-changeset:changeset [
+		doap-changeset:item [
+			a doap-changeset:Addition;
+			rdfs:label "Quad support, but not really working."@en;
+		], [
+			a doap-changeset:Change;
+			rdfs:label "Clean up documentation";
+		], [
+			a doap-changeset:Change;
+			rdfs:label "Migrate to Dist::Inkt for packaging.";
+		], [
+			a doap-changeset:Addition;
+			rdfs:label "Add more RDF data."@en;
+		], [
+			a doap-changeset:Update;
+			rdfs:label "get_context shouldn't die."@en;
+		];
+	];
+	doap:revision        "0.11_2"^^xsd:string.
+
+<http://purl.org/NET/cpan-uri/dist/RDF-Trine-Store-File/v_0_02>
+	a                    doap:Version;
+	rdfs:label           "First beta release"@en;
+	dc:issued            "2011-11-29"^^xsd:date;
+	doap:revision        "0.02"^^xsd:string.
+
+<http://purl.org/NET/cpan-uri/dist/RDF-Trine-Store-File/v_0_1>
+	a                    doap:Version;
+	rdfs:label           "Trine store test suite passes."@en;
+	dc:issued            "2011-12-22"^^xsd:date;
+	doap-changeset:changeset [
+		doap-changeset:item [
+			a doap-changeset:Bugfix;
+			rdfs:label "Escape hats in regexps."@en;
+		], [
+			a doap-changeset:Bugfix;
+			rdfs:label "Discard context."@en;
+		], [
+			a doap-changeset:Bugfix;
+			rdfs:label "Nuke should return self."@en;
+		], [
+			a doap-changeset:Bugfix;
+			rdfs:label "Escape unicode escape sequences in NTriples."@en;
+		], [
+			a doap-changeset:Addition;
+			rdfs:label "Now passing the new Test::RDF::Trine::Store test suite."@en;
+		], [
+			a doap-changeset:Addition;
+			rdfs:label "Add a build_requires on URI::Escape."@en;
+		], [
+			a doap-changeset:Addition;
+			rdfs:label "Support variables in statements."@en;
+		], [
+			a doap-changeset:Addition;
+			rdfs:label "Add more constructors and tests for them."@en;
+		], [
+			a doap-changeset:Addition;
+			rdfs:label "Note that duplicate triples aren't prevented."@en;
+		], [
+			a doap-changeset:Update;
+			rdfs:label "Many minor documentation fixes"@en;
+		];
+	];
+	doap:revision        "0.1"^^xsd:string.
+
+<http://www.kjetil.kjernsmo.net/foaf#me>
+	a                    foaf:Person;
+	foaf:mbox            <mailto:kjetilk@cpan.org>;
+	foaf:name            "Kjetil Kjernsmo";
+	owl:sameAs           <http://git2prov.org/git2prov?giturl=https%3A%2F%2Fgithub.com%2Fkjetilk%2FRDF-Trnie-Store-File&serialization=PROV-O#user-Kjetil-Kjernsmo>, <http://purl.org/NET/cpan-uri/person/kjetilk>.
+

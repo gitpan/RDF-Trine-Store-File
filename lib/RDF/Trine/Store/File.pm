@@ -22,11 +22,11 @@ RDF::Trine::Store::File - Using a file with N-Triples as triplestore
 
 =head1 VERSION
 
-Version 0.1
+Version 0.11_2
 
 =cut
 
-our $VERSION = '0.1';
+our $VERSION = '0.11_2';
 
 
 =head1 SYNOPSIS
@@ -61,6 +61,7 @@ sub new {
 		    {
 		     file => $file,
 		     fu	  => $fu,
+			  parser => 'ntriples',
 		     nser => RDF::Trine::Serializer::NTriples->new,
 		     log  => Log::Log4perl->get_logger("rdf.trine.store.file")
 		    }, $class);
@@ -124,6 +125,7 @@ sub add_statement {
   my $mm = RDF::Trine::Model->temporary_model;
   $mm->add_statement($st);
   $self->{log}->debug("Attempting addition of statement");
+  $self->{log}->trace("with terms " . $st->as_string);
   my $fd = File::Data->new($self->{file});
   $fd->append($self->{nser}->serialize_model_to_string($mm));
   return;
@@ -131,7 +133,7 @@ sub add_statement {
 
 =head2 get_statements($subject, $predicate, $object)
 
-Returns a stream object of all statements matching the specified subject,
+Returns a iterator object of all statements matching the specified subject,
 predicate and objects. Any of the arguments may be undef to match any value.
 
 =cut
@@ -139,10 +141,10 @@ predicate and objects. Any of the arguments may be undef to match any value.
 sub get_statements {
   my $self = shift;
   my @lines = $self->_search_statements(@_);
-  my $parser = RDF::Trine::Parser->new( 'ntriples' );  
+  my $parser = RDF::Trine::Parser->new($self->{parser});
   my $mm = RDF::Trine::Model->temporary_model;
   $parser->parse_into_model( '', join('', @lines), $mm );
-  return $mm->get_statements(undef, undef, undef, undef);
+  return $mm->as_stream;
 }
 
 =head2 count_statements($subject, $predicate, $object)
@@ -214,14 +216,17 @@ sub remove_statements {
 
 =head2 get_contexts
 
-Contexts are not supported for this store.
+Will return an empty iterator as this triple store does not support contexts.
 
 =cut
 
 
 sub get_contexts {
-  croak "Contexts not supported for the File store";
+  my $self = shift;
+  $self->{log}->warn("Contexts not supported for the triple File store");
+  return RDF::Trine::Iterator->new([]);
 }
+
 
 =head2 size
 
@@ -277,8 +282,9 @@ sub _search_regexp {
   my $triple_resources = $self->{nser}->serialize_model_to_string($mm);
   chomp($triple_resources);
   $triple_resources =~ s/\.\s*$/\\./;
-  $triple_resources =~ s/urn:rdf-trine-store-file-(1|2)/.*?/g;
-  $triple_resources =~ s/<urn:rdf-trine-store-file-3>/.*/;
+  $triple_resources =~ s/<urn:rdf-trine-store-file-1>/(?:<.*?>|_\:\\w+?)/;
+  $triple_resources =~ s/urn:rdf-trine-store-file-2/.*?/g;
+  $triple_resources =~ s/<urn:rdf-trine-store-file-3>/.+/;
   $triple_resources =~ s/\^/\\^/g;
   $triple_resources =~ s/\\u/\\\\u/g;
   my $out = '(' . $triple_resources . '\n)';
@@ -292,7 +298,7 @@ This module is intended mostly as a simple backend to dump data to a
 file and do as little as possible in memory. Thus, it is mostly
 suitable in cases where a lot of data is written to file. It should be
 possible to use it as a SPARQL store with L<RDF::Query>, but the
-performance is likely to be somewhere between terrible and abyssmal,
+performance is likely to be somewhere between terrible and abysmal,
 so don't do that unless you are prepared to be waiting around.
 
 On the good side, adding statements should be pretty fast, as it just
@@ -388,7 +394,7 @@ L<http://search.cpan.org/dist/RDF-Trine-Store-File/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2011 Kjetil Kjernsmo.
+Copyright 2011-2012,2014 Kjetil Kjernsmo.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published

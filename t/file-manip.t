@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 
+use strict;
 use Test::More;
 use Test::RDF;
-use File::Util;
 use RDF::Trine;
 use File::Temp qw/tempfile cleanup/;
 
@@ -31,10 +31,16 @@ like($first_etag, qr/\w{32}/, 'Etag is 32 chars long, only hex');
 note "Sleep one second to ensure new etag";
 sleep 1;
 
-my($f) = File::Util->new();
+close $fh;
+
 
 {
-  my($content) = $f->load_file($filename);
+# Now, we open the file ourselves in addition to the module
+	local $/ = undef;
+	open my ($FH), $filename;
+	my $content  = <$FH>;
+	close $FH;
+
 
   is_valid_rdf($content, 'ntriples', 'Content is valid N-Triples');
 
@@ -78,7 +84,11 @@ like($second_etag, qr/\w{32}/, 'Etag is 32 chars long, only hex');
 isnt($first_etag, $second_etag, 'Etags differ');
 
 {
-  my($content) = $f->load_file($filename);
+	local $/ = undef;
+	open my ($FH), $filename;
+	my $content  = <$FH>;
+	close $FH;
+
   is_valid_rdf($content, 'ntriples', 'Content is valid N-Triples');
 
 #  is_rdf($content, 'ntriples', '<http://example.org/a> <http://example.org/b> <http://example.org/c> .', 'ntriples', 'Content is correct');
@@ -104,6 +114,8 @@ is($store->size, 1, 'Store has one statement after match-remove');
 $store->nuke;
 
 ok(! -e $filename, 'File is gone');
+sleep(1); # to allow the FH from the previous ok() to be flushed
+
 
 {
   my $store2 = RDF::Trine::Store::File->new_with_string('File;' . $filename);

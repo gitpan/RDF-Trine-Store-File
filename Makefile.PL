@@ -1,35 +1,159 @@
-use inc::Module::Install;
+use strict;
+use ExtUtils::MakeMaker 6.17;
 
-name     'RDF-Trine-Store-File';
-all_from 'lib/RDF/Trine/Store/File.pm';
-readme_from 'lib/RDF/Trine/Store/File.pm';
-author   q{Kjetil Kjernsmo <kjetilk@cpan.org>};
-license  'perl';
+my $EUMM = eval( $ExtUtils::MakeMaker::VERSION );
 
-test_requires 'Test::More';
-test_requires 'Test::RDF::Trine::Store' => '0.137';
-test_requires 'Test::RDF' => 0.24;
+my $meta = {
+  "abstract"       => "Simple file triple and quad store based on NTriple files.",
+  "author"         => ["Kjetil Kjernsmo <kjetilk\@cpan.org>"],
+  "dynamic_config" => 0,
+  "generated_by"   => "Dist::Inkt::Profile::TOBYINK version 0.023, CPAN::Meta::Converter version 2.133380",
+  "keywords"       => ["Semantic Web"],
+  "license"        => ["perl_5"],
+  "meta-spec"      => {
+                        url => "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+                        version => 2,
+                      },
+  "name"           => "RDF-Trine-Store-File",
+  "no_index"       => { directory => ["eg", "examples", "inc", "t", "xt"] },
+  "prereqs"        => {
+                        configure => { requires => { "ExtUtils::MakeMaker" => 6.17 } },
+                        runtime => {
+                          requires => {
+                            "Carp"            => 0,
+                            "Digest::MD5"     => 0,
+                            "File::Data"      => 0,
+                            "File::Temp"      => 0,
+                            "File::Util"      => 0,
+                            "List::MoreUtils" => 0,
+                            "Log::Log4perl"   => 0,
+                            "RDF::Trine"      => 1.011,
+                            "Scalar::Util"    => 0,
+                          },
+                        },
+                        test => {
+                          requires => {
+                            "Test::More" => 0,
+                            "Test::RDF" => 0.24,
+                            "Test::RDF::Trine::Store" => 0.137,
+                            "URI::Escape" => 0,
+                          },
+                        },
+                      },
+  "provides"       => {
+                        "RDF::Trine::Store::File"       => { file => "lib/RDF/Trine/Store/File.pm", version => "0.11_2" },
+                        "RDF::Trine::Store::File::Quad" => { file => "lib/RDF/Trine/Store/File/Quad.pm" },
+                      },
+  "release_status" => "testing",
+  "resources"      => {
+                        bugtracker    => { web => "https://github.com/kjetilk/RDF-Trine-Store-File/issues" },
+                        homepage      => "https://metacpan.org/release/RDF-Trine-Store-File",
+                        license       => ["http://dev.perl.org/licenses/"],
+                        repository    => {
+                                           type => "git",
+                                           web  => "https://github.com/kjetilk/RDF-Trine-Store-File/",
+                                         },
+                        x_identifier  => "http://purl.org/NET/cpan-uri/dist/RDF-Trine-Store-File/project",
+                        x_IRC         => "irc://irc.perl.org/#perlrdf",
+                        x_mailinglist => "http://lists.perlrdf.org/listinfo/dev",
+                        x_wiki        => "http://wiki.perlrdf.org/",
+                      },
+  "version"        => "0.11_2",
+};
 
-build_requires 'URI::Escape';
+my %dynamic_config;
 
-requires 'RDF::Trine';
-requires 'File::Temp';
-requires 'File::Util';
-requires 'File::Data';
-requires 'Scalar::Util';
-requires 'Carp';
-requires 'Log::Log4perl';
-requires 'Digest::MD5';
+my %WriteMakefileArgs = (
+	ABSTRACT   => $meta->{abstract},
+	AUTHOR     => ($EUMM >= 6.5702 ? $meta->{author} : $meta->{author}[0]),
+	DISTNAME   => $meta->{name},
+	VERSION    => $meta->{version},
+	EXE_FILES  => [ map $_->{file}, values %{ $meta->{x_provides_scripts} || {} } ],
+	NAME       => do { my $n = $meta->{name}; $n =~ s/-/::/g; $n },
+	test       => { TESTS => "t/*.t" },
+	%dynamic_config,
+);
 
+$WriteMakefileArgs{LICENSE} = $meta->{license}[0] if $EUMM >= 6.3001;
 
-author_tests('xt');
+sub deps
+{
+	my %r;
+	for my $stage (@_)
+	{
+		for my $dep (keys %{$meta->{prereqs}{$stage}{requires}})
+		{
+			next if $dep eq 'perl';
+			my $ver = $meta->{prereqs}{$stage}{requires}{$dep};
+			$r{$dep} = $ver if !exists($r{$dep}) || $ver >= $r{$dep};
+		}
+	}
+	\%r;
+}
 
-auto_set_repository;
-auto_set_bugtracker;
+my ($build_requires, $configure_requires, $runtime_requires, $test_requires);
+if ($EUMM >= 6.6303)
+{
+	$WriteMakefileArgs{BUILD_REQUIRES}     ||= deps('build');
+	$WriteMakefileArgs{CONFIGURE_REQUIRES} ||= deps('configure');
+	$WriteMakefileArgs{TEST_REQUIRES}      ||= deps('test');
+	$WriteMakefileArgs{PREREQ_PM}          ||= deps('runtime');
+}
+elsif ($EUMM >= 6.5503)
+{
+	$WriteMakefileArgs{BUILD_REQUIRES}     ||= deps('build', 'test');
+	$WriteMakefileArgs{CONFIGURE_REQUIRES} ||= deps('configure');
+	$WriteMakefileArgs{PREREQ_PM}          ||= deps('runtime');	
+}
+elsif ($EUMM >= 6.52)
+{
+	$WriteMakefileArgs{CONFIGURE_REQUIRES} ||= deps('configure');
+	$WriteMakefileArgs{PREREQ_PM}          ||= deps('runtime', 'build', 'test');	
+}
+else
+{
+	$WriteMakefileArgs{PREREQ_PM}          ||= deps('configure', 'build', 'test', 'runtime');	
+}
 
-write_doap_changes;
+{
+	my ($minperl) = reverse sort(
+		grep defined && /^[0-9]+(\.[0-9]+)?$/,
+		map $meta->{prereqs}{$_}{requires}{perl},
+		qw( configure build runtime )
+	);
+	
+	if (defined($minperl))
+	{
+		die "Installing $meta->{name} requires Perl >= $minperl"
+			unless $] >= $minperl;
+		
+		$WriteMakefileArgs{MIN_PERL_VERSION} ||= $minperl
+			if $EUMM >= 6.48;
+	}
+}
 
-sign;
+sub FixMakefile
+{
+	return unless -d 'inc';
+	my $file = shift;
+	
+	local *MAKEFILE;
+	open MAKEFILE, "< $file" or die "FixMakefile: Couldn't open $file: $!; bailing out";
+	my $makefile = do { local $/; <MAKEFILE> };
+	close MAKEFILE or die $!;
+	
+	$makefile =~ s/\b(test_harness\(\$\(TEST_VERBOSE\), )/$1'inc', /;
+	$makefile =~ s/( -I\$\(INST_ARCHLIB\))/ -Iinc$1/g;
+	$makefile =~ s/( "-I\$\(INST_LIB\)")/ "-Iinc"$1/g;
+	$makefile =~ s/^(FULLPERL = .*)/$1 "-Iinc"/m;
+	$makefile =~ s/^(PERL = .*)/$1 "-Iinc"/m;
+	
+	open  MAKEFILE, "> $file" or die "FixMakefile: Couldn't open $file: $!; bailing out";
+	print MAKEFILE $makefile or die $!;
+	close MAKEFILE or die $!;
+}
 
-WriteAll;
+my $mm = WriteMakefile(%WriteMakefileArgs);
+FixMakefile($mm->{FIRST_MAKEFILE} || 'Makefile');
+exit(0);
 

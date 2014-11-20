@@ -1,0 +1,35 @@
+RDF-Trine-Store-File
+====================
+
+Created:      2011-07-21
+Home page:    <https://metacpan.org/release/RDF-Trine-Store-File>
+Bug tracker:  <https://github.com/kjetilk/RDF-Trine-Store-File/issues>
+Wiki:         <http://wiki.perlrdf.org/>
+Mailing list: <http://lists.perlrdf.org/listinfo/dev>
+Maintainer:   Kjetil Kjernsmo <kjetilk@cpan.org>
+
+0.11_2	2014-11-20	Unfinished quad support.
+
+ - Added: Add more RDF data.
+ - Added: Quad support, but not really working.
+ - Clean up documentation
+ - Migrate to Dist::Inkt for packaging.
+ - Updated: get_context shouldn't die.
+
+0.1	2011-12-22	Trine store test suite passes.
+
+ [ Bug Fixes ]
+ - Discard context.
+ - Escape hats in regexps.
+ - Escape unicode escape sequences in NTriples.
+ - Nuke should return self.
+
+ [ Other ]
+ - Added: Add a build_requires on URI::Escape.
+ - Added: Add more constructors and tests for them.
+ - Added: Note that duplicate triples aren't prevented.
+ - Added: Now passing the new Test::RDF::Trine::Store test suite.
+ - Added: Support variables in statements.
+ - Updated: Many minor documentation fixes
+
+0.02	2011-11-29	First beta release
